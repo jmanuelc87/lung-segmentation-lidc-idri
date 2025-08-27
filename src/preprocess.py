@@ -144,6 +144,7 @@ def create_dataset():
             "patch": sorted(patch_paths),
             "patch_mask": sorted(patch_mask_paths),
             "malignancy": [el["malignancy"] for _, el in labels.iterrows()],
+            "cancer": [el["cancer"] for _, el in labels.iterrows()],
         }
     )
 
