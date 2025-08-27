@@ -1168,6 +1168,7 @@ dependencies = [
     { name = "scikit-image" },
     { name = "setuptools" },
     { name = "simpleitk" },
+    { name = "tqdm" },
 ]
 
 [package.dev-dependencies]
@@ -1193,6 +1194,7 @@ requires-dist = [
     { name = "scikit-image", specifier = ">=0.25.2" },
     { name = "setuptools", specifier = ">=80.9.0" },
     { name = "simpleitk", specifier = ">=2.5.2" },
+    { name = "tqdm", specifier = ">=4.67.1" },
 ]
 
 [package.metadata.requires-dev]
