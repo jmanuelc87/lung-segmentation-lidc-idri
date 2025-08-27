@@ -17,12 +17,15 @@ dependencies = [
     "pylidc-updated>=0.2.3",
     "scikit-image>=0.25.2",
     "setuptools>=80.9.0",
+    "simpleitk>=2.5.2",
 ]
 
 [dependency-groups]
 dev = [
     "ipykernel>=6.30.1",
     "ipywidgets>=8.1.7",
+    "pyrefly>=0.30.0",
+    "pytest>=8.4.1",
 ]
 
 [tool.uv]
@@ -31,3 +34,11 @@ package = true
 [project.scripts]
 preprocess = "preprocess:main"
 create_dataset = "preprocess:create_dataset"
+
+[tool.pyrefly]
+project-includes = ["**/*"]
+project-excludes = [
+    "**/node_modules",
+    "**/__pycache__",
+    "**/*venv/**/*",
+]
