@@ -94,6 +94,16 @@ def create_image_patch(id, i, vol, anns, pad, mask, image):
     save_image(arr, os.path.join(image, f"{id:04d}-{i:02d}.png"))
 
 
+def calculate_malignancy(arr: list):
+    result = median_high(arr)
+    if result > 3:
+        return result, "Yes"
+    elif result < 3:
+        return result, "No"
+    else:
+        return result, "Ambiguous"
+
+
 def preprocess(scan, coll: deque, progress):
     with NoP():
         vol = scan.to_volume()
@@ -112,21 +122,15 @@ def preprocess(scan, coll: deque, progress):
         create_image_patch(scan.id, i, vol, anns, pad=48, mask=PATCH_MASK, image=PATCH)
 
         # LABELS
-        list = []
-        for ann in anns:
-            list.append(ann.malignancy)
+        malignancy, cancer = calculate_malignancy([m.malignancy for m in anns])
 
-        labels = {}
-        malignancy = median_high(list)
-        labels["malignancy"] = malignancy
-        if malignancy > 3:
-            labels["cancer"] = "Yes"
-        elif malignancy < 3:
-            labels["cancer"] = "No"
-        else:
-            labels["cancer"] = "Ambiguous"
-
-        coll.append({"id": f"{scan.id:04d}-{i:02d}", "label": labels})
+        coll.append(
+            {
+                "id": f"{scan.id:04d}-{i:02d}",
+                "malignancy": malignancy,
+                "cancer": cancer,
+            }
+        )
     progress.update()
 
 
@@ -172,14 +176,7 @@ def main():
         for result in results:
             result.join()
 
-    labels = [
-        {
-            "id": el["id"],
-            "malignancy": el["label"]["malignancy"],
-            "cancer": el["label"]["cancer"],
-        }
-        for el in sorted(list(coll), key=lambda x: x["id"])
-    ]
+    labels = [el for el in sorted(list(coll), key=lambda x: x["id"])]
 
     df = pd.DataFrame(data=labels)
     df.to_csv("./data/labels.csv")
