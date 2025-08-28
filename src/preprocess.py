@@ -49,7 +49,9 @@ def save_image(arr: np.ndarray, file_path: str, interpolator=sitk.sitkLinear):
     original_size = image.GetSize()
     original_spacing = image.GetSpacing()
 
-    new_spacing = [(original_size[0] - 1) * original_spacing[0] / (512 - 1)] * 3
+    new_spacing = [(original_size[0] - 1) * original_spacing[0] / (512 - 1)] * 2 + [
+        original_spacing[2]
+    ]
     new_size = [
         512,
         int((original_size[1] - 1) * original_spacing[1] / new_spacing[1]),
