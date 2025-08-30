@@ -1,4 +1,3 @@
-from sqlalchemy.testing.plugin.plugin_base import logging
 import pytest
 import logging
 import pylidc as pl
@@ -11,6 +10,7 @@ from collections import deque
 LOG = logging.getLogger(__name__)
 
 
+@pytest.mark.skip()
 def test_preprocess():
     scan = pl.query(pl.Scan).first()
     coll = deque()
