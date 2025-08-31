@@ -3,27 +3,23 @@ name = "lung-segmentation-lidc-idri"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.9"
 dependencies = [
     "albumentationsx>=2.0.10",
     "datasets>=4.0.0",
     "dotenv>=0.9.9",
     "huggingface-hub>=0.34.4",
-    "matplotlib>=3.10.5",
-    "numpy>=2.2.6",
-    "opencv-contrib-python>=4.11.0.86",
+    "matplotlib>=3.9.4",
+    "numpy>=1.26.4",
     "opencv-python>=4.11.0.86",
     "pillow>=11.3.0",
     "pylidc>=0.2.3",
-    "pylidc-updated>=0.2.3",
-    "scikit-image>=0.25.2",
+    "scikit-image>=0.24.0",
     "setuptools>=80.9.0",
     "simpleitk>=2.5.2",
-    "torch>=2.8.0",
-    "torch-lr-finder>=0.2.2",
-    "torcheval>=0.0.7",
-    "torchinfo>=1.8.0",
-    "torchvision>=0.23.0",
+    "tensorflow>=2.16.2",
+    "tensorflow-macos>=2.16.2",
+    "tensorflow-metal>=1.2.0",
     "tqdm>=4.67.1",
 ]
 

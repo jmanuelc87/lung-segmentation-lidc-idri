@@ -1,114 +1,214 @@
-import torch
-import logging
+import keras
 
+from keras.layers import (
+    Activation,
+    Conv2D,
+    MaxPooling2D,
+    AveragePooling2D,
+    Conv2DTranspose,
+    Concatenate,
+)
 from models.common import ConvBlock
 
 
-logger = logging.getLogger(__name__)
-
-
-class Encoder(torch.nn.Module):
-
-    def __init__(self, in_channels, out_channels):
-        super().__init__()
-        self.in_channels = in_channels
-        self.out_channels = out_channels
-
-        self.build()
-
-    def build(self):
-        self.conv = ConvBlock(self.in_channels, self.out_channels, padding=1)
-        self.pool = torch.nn.MaxPool2d(kernel_size=(2, 2))
-
-    def forward(self, input_tensor):
-        cx = self.conv(input_tensor)
-        px = self.pool(cx)
-
-        return px, cx
-
-
-class Decoder(torch.nn.Module):
+@keras.saving.register_keras_serializable()
+class Encoder(keras.layers.Layer):
 
     def __init__(
         self,
-        in_channels,
-        out_channels,
+        *,
+        activity_regularizer=None,
+        trainable=True,
+        dtype=None,
+        autocast=True,
+        name=None,
+        **kwargs,
     ):
-        super().__init__()
-        self.in_channels = in_channels
-        self.out_channels = out_channels
-
-        self.build()
-
-    def build(self):
-        self.pose = torch.nn.ConvTranspose2d(
-            self.in_channels,
-            self.out_channels,
-            kernel_size=2,
-            stride=2,
+        super().__init__(
+            activity_regularizer=activity_regularizer,
+            trainable=trainable,
+            dtype=dtype,
+            autocast=autocast,
+            name=name,
         )
 
-        self.conv = ConvBlock(
-            self.in_channels,
-            self.out_channels,
-            padding=1,
+        self.filters = kwargs["filters"]
+        self.act = kwargs["activation"]
+        self.dropout = kwargs["dropout"]
+        self.dilation = kwargs["dilation"]
+
+    def build(self, input_shape):
+        self.conv1 = ConvBlock(
+            filters=self.filters,
+            activation=self.act,
+            dropout=self.dropout,
+            dilation=self.dilation,
+        )
+        self.pool1 = MaxPooling2D((2, 2))
+        super().build(input_shape)
+
+    def get_config(self):
+        config = super().get_config()
+        config.update(
+            {
+                "filters": self.filters,
+                "activation": self.act,
+                "dropout": self.dropout,
+                "dilation": self.dilation,
+            }
+        )
+        return config
+
+    def call(self, x):
+        c = self.conv1(x)
+        p = self.pool1(c)
+
+        return p, c
+
+
+@keras.saving.register_keras_serializable()
+class Decoder(keras.layers.Layer):
+
+    def __init__(
+        self,
+        *,
+        activity_regularizer=None,
+        trainable=True,
+        dtype=None,
+        autocast=True,
+        name=None,
+        **kwargs,
+    ):
+        super().__init__(
+            activity_regularizer=activity_regularizer,
+            trainable=trainable,
+            dtype=dtype,
+            autocast=autocast,
+            name=name,
         )
 
-    def forward(self, input_tensor, skip):
-        x = self.pose(input_tensor)
-        x = torch.cat([x, skip], dim=1)
-        x = self.conv(x)
+        self.filters = kwargs["filters"]
+        self.act = kwargs["activation"]
+        self.dropout = kwargs["dropout"]
+        self.dilation = kwargs["dilation"]
+
+    def build(self, input_shape):
+        self.trans = Conv2DTranspose(self.filters, 2, strides=2, padding="same")
+        self.concat = Concatenate()
+        self.conv1 = ConvBlock(
+            filters=self.filters,
+            activation=self.act,
+            dropout=self.dropout,
+            dilation=self.dilation,
+        )
+        super().build(input_shape)
+
+    def get_config(self):
+        config = super().get_config()
+        config.update(
+            {
+                "filters": self.filters,
+                "activation": self.act,
+                "dropout": self.dropout,
+                "dilation": self.dilation,
+            }
+        )
+        return config
+
+    def call(self, x, skip):
+        x = self.trans(x)
+        x = self.concat([x, skip])
+        x = self.conv1(x)
 
         return x
 
 
-class UNet(torch.nn.Module):
+class UNet(keras.Model):
 
-    def __init__(self, in_channels, num_classes, steps=(64, 128, 256, 512)):
-        super().__init__()
-        self.in_channels = in_channels
+    def __init__(self, num_classes, activation="relu"):
+        super(UNet, self).__init__()
         self.num_classes = num_classes
-        self.steps = steps
+        self.activation = activation
+        self.encoder1 = Encoder(
+            filters=64,
+            activation=self.activation,
+            dropout=0.1,
+            dilation=1,
+        )
+        self.encoder2 = Encoder(
+            filters=128,
+            activation=self.activation,
+            dropout=0.1,
+            dilation=1,
+        )
+        self.encoder3 = Encoder(
+            filters=256,
+            activation=self.activation,
+            dropout=0.1,
+            dilation=1,
+        )
+        self.encoder4 = Encoder(
+            filters=512,
+            activation=self.activation,
+            dropout=0.1,
+            dilation=1,
+        )
 
-        self.build()
+        self.bottleneck = ConvBlock(
+            filters=1024,
+            activation=self.activation,
+            dropout=0.1,
+            dilation=2,
+        )
 
-    def build(self):
-        self.middle = ConvBlock(self.steps[-1], self.steps[-1] * 2, padding=1)
-        self.head = torch.nn.Conv2d(self.steps[0], self.num_classes, kernel_size=1)
-        self.encoders = []
-        self.decoders = []
+        self.decoder1 = Decoder(
+            filters=512,
+            activation=self.activation,
+            dropout=0.1,
+            dilation=1,
+        )
+        self.decoder2 = Decoder(
+            filters=256,
+            activation=self.activation,
+            dropout=0.1,
+            dilation=1,
+        )
+        self.decoder3 = Decoder(
+            filters=128,
+            activation=self.activation,
+            dropout=0.1,
+            dilation=1,
+        )
+        self.decoder4 = Decoder(
+            filters=64,
+            activation=self.activation,
+            dropout=0.1,
+            dilation=1,
+        )
 
-        next_step = self.in_channels
-        for step in self.steps:
-            e = Encoder(next_step, step)
-            self.encoders.append(e)
-            next_step = step
+        self.conv1x1 = Conv2D(
+            self.num_classes,
+            1,
+            padding="same",
+            use_bias=False,
+        )
 
-        self.encoders = torch.nn.ModuleList(self.encoders)
+        self.head = Activation("sigmoid")
 
-        next_step = next_step * 2
-        for step in sorted(self.steps, reverse=True):
-            d = Decoder(next_step, step)
-            self.decoders.append(d)
-            next_step = step
+    def call(self, input_tensor):
+        p1, c1 = self.encoder1(input_tensor)
+        p2, c2 = self.encoder2(p1)
+        p3, c3 = self.encoder3(p2)
+        p4, c4 = self.encoder4(p3)
 
-        self.decoders = torch.nn.ModuleList(self.decoders)
+        b0 = self.bottleneck(p4)
 
-    def forward(self, input_tensor):
-        skip_conn = []
-        x = input_tensor
+        u0 = self.decoder1(b0, c4)
+        u1 = self.decoder2(u0, c3)
+        u2 = self.decoder3(u1, c2)
+        u3 = self.decoder4(u2, c1)
 
-        for encoder in self.encoders:
-            p0, c0 = encoder(x)
-            x = p0
-            skip_conn.append(c0)
+        out = self.conv1x1(u3)
+        out = self.head(out)
 
-        u0 = self.middle(x)
-
-        for i, decoder in enumerate(self.decoders):
-            idx = len(self.steps) - 1 - i
-            u0 = decoder(u0, skip_conn[idx])
-
-        x = self.head(u0)
-
-        return x
+        return out

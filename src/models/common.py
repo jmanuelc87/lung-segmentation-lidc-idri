@@ -1,45 +1,96 @@
-import torch
+import keras
+
+from keras.layers import Conv2D, BatchNormalization, Dropout, Activation, Add
 
 
-class ConvBlock(torch.nn.Module):
+@keras.saving.register_keras_serializable()
+class ConvBlock(keras.layers.Layer):
 
     def __init__(
         self,
-        in_channels,
-        out_channels,
-        kernel_size=(3, 3),
-        stride=1,
-        padding=0,
-        dilation=1,
-        bias=False,
+        *,
+        activity_regularizer=None,
+        trainable=True,
+        dtype=None,
+        autocast=True,
+        name=None,
+        **kwargs,
     ):
-        super().__init__()
-        self.in_channels = in_channels
-        self.out_channels = out_channels
-        self.kernel_size = kernel_size
-        self.stride = stride
-        self.padding = padding
-        self.dilation = dilation
-        self.bias = bias
-
-        self.build()
-
-    def build(self):
-        self.conv1 = torch.nn.Conv2d(
-            self.in_channels,
-            self.out_channels,
-            self.kernel_size,
-            stride=self.stride,
-            padding=self.padding,
-            dilation=self.dilation,
-            bias=self.bias,
+        super().__init__(
+            activity_regularizer=activity_regularizer,
+            trainable=trainable,
+            dtype=dtype,
+            autocast=autocast,
+            name=name,
         )
-        self.norm1 = torch.nn.BatchNorm2d(self.out_channels)
-        self.relu1 = torch.nn.ReLU(inplace=False)
 
-    def forward(self, input_tensor):
-        x = self.conv1(input_tensor)
-        x = self.norm1(x)
-        x = self.relu1(x)
+        self.filters = kwargs["filters"]
+        self.act = kwargs["activation"]
+        self.dropout = kwargs["dropout"]
+        self.dilation = kwargs["dilation"]
+
+    def build(self, input_shape):
+        self.conv1 = Conv2D(
+            self.filters,
+            3,
+            padding="same",
+            kernel_initializer="he_normal",
+            dilation_rate=self.dilation,
+            use_bias=False,
+        )
+        self.conv2 = Conv2D(
+            self.filters,
+            3,
+            padding="same",
+            kernel_initializer="he_normal",
+            dilation_rate=self.dilation,
+            use_bias=False,
+        )
+        self.conv3 = Conv2D(
+            self.filters,
+            1,
+            padding="same",
+            use_bias=False,
+        )
+        self.batc1 = BatchNormalization()
+        self.batc2 = BatchNormalization()
+        self.batc3 = BatchNormalization()
+        self.drop1 = Dropout(self.dropout)
+        self.acti1 = Activation(self.act)
+        self.acti2 = Activation(self.act)
+        self.acti3 = Activation(self.act)
+        self.add1 = Add()
+        super().build(input_shape)
+
+    def get_config(self):
+        config = super().get_config()
+        config.update(
+            {
+                "filters": self.filters,
+                "activation": self.act,
+                "dropout": self.dropout,
+                "dilation": self.dilation,
+            }
+        )
+        return config
+
+    def call(self, x):
+        x_in = x
+        x = self.conv1(x)
+        x = self.batc1(x)
+        x = self.acti1(x)
+
+        if self.dropout > 0:
+            x = self.drop1(x)
+
+        x = self.conv2(x)
+        x = self.batc2(x)
+
+        if x_in.shape[-1] != self.filters:
+            x_in = self.conv3(x_in)
+            x_in = self.batc3(x_in)
+
+        x = self.add1([x, x_in])
+        x = self.acti3(x)
 
         return x
