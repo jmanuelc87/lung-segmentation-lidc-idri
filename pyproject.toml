@@ -15,6 +15,7 @@ dependencies = [
     "pillow>=11.3.0",
     "pylidc>=0.2.3",
     "scikit-image>=0.24.0",
+    "segmentation-models>=1.0.1",
     "setuptools>=80.9.0",
     "simpleitk>=2.5.2",
     "tensorflow>=2.16.2",

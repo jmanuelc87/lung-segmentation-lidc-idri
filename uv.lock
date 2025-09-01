@@ -750,6 +750,20 @@ wheels = [
 ]
 
 [[package]]
+name = "efficientnet"
+version = "1.0.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "keras-applications" },
+    { name = "scikit-image", version = "0.24.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
+    { name = "scikit-image", version = "0.25.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/da/94/0af58e74b6e3f1f217a84289e9fd5a11e75276ac675d5c24d512f6a56720/efficientnet-1.0.0.tar.gz", hash = "sha256:868715f6f5467186c0fa67ee8c9d50260b22f3a1bfb5919acd9911358be54df9", size = 15153, upload-time = "2019-10-04T10:15:07.122Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/97/82/f3ae07316f0461417dc54affab6e86ab188a5a22f33176d35271628b96e0/efficientnet-1.0.0-py3-none-any.whl", hash = "sha256:c6fd035d856c9f1c409f3ac19e7655e54a13851046c821e9d4417fd12bcbaae4", size = 17685, upload-time = "2019-10-04T10:15:05.195Z" },
+]
+
+[[package]]
 name = "eval-type-backport"
 version = "0.2.2"
 source = { registry = "https://pypi.org/simple" }
@@ -1207,6 +1221,18 @@ wheels = [
 ]
 
 [[package]]
+name = "image-classifiers"
+version = "1.0.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "keras-applications" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/83/89/cf76a884d63477fc0e964d3494e65095272af60c48ee72b2c74b96da92c7/image_classifiers-1.0.0.tar.gz", hash = "sha256:62022c0ff919d8ba5e3ffb7958b7db916e102e3e65c47c71cf8717ced43c0e4c", size = 18195, upload-time = "2019-10-04T10:27:28.193Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/81/98/6f84720e299a4942ab80df5f76ab97b7828b24d1de5e9b2cbbe6073228b7/image_classifiers-1.0.0-py3-none-any.whl", hash = "sha256:6030bdfd1bc334a4e9d018e8962fbe9c8deba3257dc21c237032ff1590da2b98", size = 19951, upload-time = "2019-10-04T10:27:26.234Z" },
+]
+
+[[package]]
 name = "imageio"
 version = "2.37.0"
 source = { registry = "https://pypi.org/simple" }
@@ -1499,6 +1525,19 @@ wheels = [
 ]
 
 [[package]]
+name = "keras-applications"
+version = "1.0.8"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "h5py" },
+    { name = "numpy" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/21/56/4bcec5a8d9503a87e58e814c4e32ac2b32c37c685672c30bc8c54c6e478a/Keras_Applications-1.0.8.tar.gz", hash = "sha256:5579f9a12bcde9748f4a12233925a59b93b73ae6947409ff34aa2ba258189fe5", size = 289095, upload-time = "2019-05-30T18:26:21.641Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/71/e3/19762fdfc62877ae9102edf6342d71b28fbfd9dea3d2f96a882ce099b03f/Keras_Applications-1.0.8-py3-none-any.whl", hash = "sha256:df4323692b8c1174af821bf906f1e442e63fa7589bf0f1230a0b6bdc5a810c95", size = 50704, upload-time = "2019-05-30T18:26:19.576Z" },
+]
+
+[[package]]
 name = "kiwisolver"
 version = "1.4.7"
 source = { registry = "https://pypi.org/simple" }
@@ -1768,6 +1807,7 @@ dependencies = [
     { name = "pylidc" },
     { name = "scikit-image", version = "0.24.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
     { name = "scikit-image", version = "0.25.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
+    { name = "segmentation-models" },
     { name = "setuptools" },
     { name = "simpleitk" },
     { name = "tensorflow" },
@@ -1796,6 +1836,7 @@ requires-dist = [
     { name = "pillow", specifier = ">=11.3.0" },
     { name = "pylidc", specifier = ">=0.2.3" },
     { name = "scikit-image", specifier = ">=0.24.0" },
+    { name = "segmentation-models", specifier = ">=1.0.1" },
     { name = "setuptools", specifier = ">=80.9.0" },
     { name = "simpleitk", specifier = ">=2.5.2" },
     { name = "tensorflow", specifier = ">=2.16.2" },
@@ -3686,6 +3727,20 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/95/47/1a0b0aff40c3056d955f38b0df5d178350c3d74734ec54f9c68d23910be5/scipy-1.16.1-cp314-cp314t-musllinux_1_2_aarch64.whl", hash = "sha256:5e1a106f8c023d57a2a903e771228bf5c5b27b5d692088f457acacd3b54511e4", size = 35665080, upload-time = "2025-07-27T16:31:42.025Z" },
     { url = "https://files.pythonhosted.org/packages/64/df/ce88803e9ed6e27fe9b9abefa157cf2c80e4fa527cf17ee14be41f790ad4/scipy-1.16.1-cp314-cp314t-musllinux_1_2_x86_64.whl", hash = "sha256:709559a1db68a9abc3b2c8672c4badf1614f3b440b3ab326d86a5c0491eafae3", size = 38050306, upload-time = "2025-07-27T16:31:48.109Z" },
     { url = "https://files.pythonhosted.org/packages/6e/6c/a76329897a7cae4937d403e623aa6aaea616a0bb5b36588f0b9d1c9a3739/scipy-1.16.1-cp314-cp314t-win_amd64.whl", hash = "sha256:c0c804d60492a0aad7f5b2bb1862f4548b990049e27e828391ff2bf6f7199998", size = 39427705, upload-time = "2025-07-27T16:31:53.96Z" },
+]
+
+[[package]]
+name = "segmentation-models"
+version = "1.0.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "efficientnet" },
+    { name = "image-classifiers" },
+    { name = "keras-applications" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/3c/4d/c83cbaef289d23eb858a7ffa2459655ae4e17765fd883d59685fb8a2e17d/segmentation_models-1.0.1.tar.gz", hash = "sha256:fee0b9aedc17bb487b4e4127033f28c35c1c182ef726ebe5deeea071e4cadff4", size = 25027, upload-time = "2020-01-10T11:36:03.868Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/da/b9/4a183518c21689a56b834eaaa45cad242d9ec09a4360b5b10139f23c63f4/segmentation_models-1.0.1-py3-none-any.whl", hash = "sha256:2c52ca7b2485b5071ffbf11b771c69179e896b3ba47b0f8704aeab00f9f91ce3", size = 33589, upload-time = "2020-01-10T11:36:02.024Z" },
 ]
 
 [[package]]
